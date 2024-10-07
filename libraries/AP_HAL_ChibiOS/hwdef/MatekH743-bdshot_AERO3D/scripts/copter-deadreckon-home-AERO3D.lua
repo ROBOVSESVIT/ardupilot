@@ -298,6 +298,10 @@ function update()
 
     -- wait for GPS and EKF to be good
     if (gps_or_ekf_bad) then
+      -- AERO3D failsafe
+    elseif not rc:has_valid_input() and (home_dist <= enable_dist:get()) then
+      vehicle:set_mode(copter_guided_nogps_mode)
+      vehicle:set_target_angle_and_climbrate(0, 0, 0, wpnav_accel_z:get(), false, 0)
       return update, interval_ms
     end
 
