@@ -280,9 +280,6 @@ function update()
     if home and curr_loc then
       home_dist = curr_loc:get_distance(home)
       home_yaw = math.deg(curr_loc:get_bearing(home))
-    elseif (update_user) then
-      -- warn user of unexpected failure
-      gcs:send_text(0, "DR: could not get home or vehicle location")
     end
   end
 
@@ -301,7 +298,7 @@ function update()
       -- AERO3D failsafe
     elseif not rc:has_valid_input() and (home_dist <= enable_dist:get()) then
       vehicle:set_mode(copter_guided_nogps_mode)
-      vehicle:set_target_angle_and_climbrate(0, 0, 0, wpnav_accel_z:get(), false, 0)
+      vehicle:set_target_angle_and_climbrate(0, math.abs(fly_angle:get()), target_yaw, wpnav_accel_z:get(), false, 0)
       return update, interval_ms
     end
 
@@ -312,10 +309,8 @@ function update()
       -- AERO3D failsafe
     elseif not rc:has_valid_input() and (home_dist <= enable_dist:get()) then
       vehicle:set_mode(copter_guided_nogps_mode)
-      vehicle:set_target_angle_and_climbrate(0, 0, 0, wpnav_accel_z:get(), false, 0)
+      vehicle:set_target_angle_and_climbrate(0, math.abs(fly_angle:get()), target_yaw, wpnav_accel_z:get(), false, 0)
       return update, interval_ms
-    elseif (update_user) then
-      gcs:send_text(5, "DR: waiting for dist:" .. tostring(math.floor(home_dist)) .. " need:" .. tostring(math.floor(enable_dist:get())))
     end
     return update, interval_ms
   end
@@ -337,7 +332,7 @@ function update()
       -- AERO3D failsafe
     elseif not rc:has_valid_input() and (home_dist <= enable_dist:get()) then
       vehicle:set_mode(copter_guided_nogps_mode)
-      vehicle:set_target_angle_and_climbrate(0, 0, 0, wpnav_accel_z:get(), false, 0)
+      vehicle:set_target_angle_and_climbrate(0, 0, target_yaw, wpnav_accel_z:get(), false, 0)
       return update, interval_ms
     else
       -- store flight mode (may be used during recovery)
